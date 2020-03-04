@@ -2,14 +2,15 @@ import React, { Component } from "react";
 import "./App.css";
 import http from "./S3/async";
 import { UseStateHook } from "./S3/UseStateHook";
-import { Person } from "./S3/Person";
+import Header from "./S3/components/Header/Header";
+import PersonList from "./S3/components/PersonList/PersonList";
+import withClass from "./hoc/withClass";
+import AuthContext from "./context/auth-context";
 
 async function sum() {
   let data = await http([1, 2, 3, 4, 5]);
   console.log(data);
 }
-
-// sum();
 
 export class App extends Component {
   state = {
@@ -18,25 +19,11 @@ export class App extends Component {
       { id: 2, name: "Mike", age: 40 },
       { id: 3, name: "John", age: 39 }
     ],
-    showPeople: false
+    showPeople: false,
+    showHeader: true,
+    changeCounter: 0,
+    auth: false
   };
-
-  renderPeople() {
-    return (
-      <>
-        {this.state.persons.map(p => (
-          <Person
-            key={p.id}
-            id={p.id}
-            name={p.name}
-            age={p.age}
-            inputChange={this.updateName.bind(this)}
-            deleteCB={this.deletePerson.bind(this)}
-          />
-        ))}
-      </>
-    );
-  }
 
   deletePerson(id) {
     this.setState({
@@ -47,10 +34,14 @@ export class App extends Component {
   }
 
   updateName(e, id) {
-    return this.setState({
-      persons: this.state.persons.map(person =>
-        person.id === id ? { ...person, name: e.target.value } : person
-      )
+    let oldName = e.target.value;
+    return this.setState((prevState, props) => {
+      return {
+        persons: this.state.persons.map(person =>
+          person.id === id ? { ...person, name: oldName } : person
+        ),
+        changeCounter: prevState.changeCounter + 1
+      };
     });
   }
 
@@ -60,23 +51,45 @@ export class App extends Component {
     });
   };
 
-  render = () => {
-
-    let personsList = "No people";
-
-    if(this.state.showPeople){
-      personsList = this.renderPeople();
-    }
-
-    return (
-      <div className="container">
-        <button onClick={this.showhidePeople}>
-          {this.state.showPeople === true ? "Hide" : "Show"}
-        </button>
-        { personsList }
-      </div>
-    );
+  loginHandler () {
+    console.log("login");
+    this.setState({
+      auth: true
+    });
   };
+
+  render = () => (
+    <div classes="container">
+      <h2>Title: {this.props.AppTitle}</h2>
+      <button
+        onClick={() => {
+          this.setState({ showHeader: !this.state.showHeader });
+        }}
+      >
+        Hide Header
+      </button>
+      <AuthContext.Provider
+        value={{ authenticated: this.state.auth, login: this.loginHandler.bind(this) }}
+      >
+        {this.state.showHeader && (
+          <Header
+            persons={this.state.persons}
+            showPeople={this.state.showPeople}
+            showhidePeople={this.showhidePeople}
+          />
+        )}
+
+        {this.state.showPeople && (
+          <PersonList
+            showPeople={this.state.showPeople}
+            persons={this.state.persons}
+            updateName={this.updateName.bind(this)}
+            deletePerson={this.deletePerson.bind(this)}
+          />
+        )}
+      </AuthContext.Provider>
+    </div>
+  );
 }
 
-export default App;
+export default withClass(App, "App");

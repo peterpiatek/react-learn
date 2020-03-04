@@ -1,0 +1,15 @@
+.Person {
+  background: #fda;
+  &:hover {
+    background: #fad;
+  }
+  button {
+    color: white;
+  }
+  &.disabled{
+    background: #cccccc;
+  }
+  &.last{
+    border-bottom: solid 2px red;
+  }
+}

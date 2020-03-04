@@ -1,8 +1,7 @@
 import React, { Component } from "react";
 import "./App.css";
 
-
-export default class AppS4 extends Component {
+export default class AppS7 extends Component {
   state = {
 
   };
