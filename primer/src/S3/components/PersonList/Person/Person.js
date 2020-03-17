@@ -10,7 +10,7 @@ export class Person extends Component {
     this.inputRef = React.createRef();
   }
 
-  static 
+  // static 
 
   componentDidMount() {
     this.inputRef.current.focus();
